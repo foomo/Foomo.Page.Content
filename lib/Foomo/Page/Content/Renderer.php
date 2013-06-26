@@ -29,6 +29,10 @@ use Foomo\Page\Content;
  */
 class Renderer
 {
+	public static function renderURLFormMedium(Node $node, $srcAttrValue, $widthAttrValue, $heightAttrValue)
+	{
+		return Module::getHtdocsPath('medium.php') . $node->path . ':' . $srcAttrValue;
+	}
 	public static function renderNode(Node $node, $rootDir, $locale, $contentType, $baseURL)
 	{
 		$doc = new Doc;
@@ -45,8 +49,12 @@ class Renderer
 		}
 		foreach($doc->getElementsByTagName('img') as $imgEl) {
 			/* @var El $imgEl */
-			$src = $imgEl->getAttribute('src');
-			$src = Module::getHtdocsPath('medium.php') . $node->path . ':' . $src;
+			$src = call_user_func_array(array(get_called_class(), 'renderURLFormMedium'), array(
+				$node,
+				$imgEl->getAttribute('src'),
+				$imgEl->getAttribute('width'),
+				$imgEl->getAttribute('height')
+			));
 			$imgEl->setAttribute('src', $src);
 		}
 		foreach($doc->getElementsByTagName('div') as $divEl) {

@@ -52,7 +52,7 @@ class Content
 			self::addPath($childNode, $path);
 		}
 	}
-	private static function searchNode(Content\Node $node, $path, $id)
+	public static function searchNode(Content\Node $node, $path, $id)
 	{
 		if($node->path == $id) {
 			return $node;
