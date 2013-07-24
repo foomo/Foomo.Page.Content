@@ -72,7 +72,7 @@ class Renderer
 		}
 		// i wish there was a nicer way to strip html
 		$html = $doc->saveHTML();
-		$html = substr($html, strpos($html, '<body>'));
+		$html = substr($html, strpos($html, '<body>') + 6);
 		return substr($html, 0, strpos($html, '</body>'));
 	}
 
