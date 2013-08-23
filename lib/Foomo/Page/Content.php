@@ -48,8 +48,10 @@ class Content
 			$path .= ((substr($path, -1) == '/')?'':'/') . $node->id;
 		}
 		$node->path = $path;
-		foreach($node->nodes as $childNode) {
-			self::addPath($childNode, $path);
+		if(is_array($node->nodes)) {
+			foreach($node->nodes as $childNode) {
+				self::addPath($childNode, $path);
+			}
 		}
 	}
 	public static function searchNode(Content\Node $node, $path, $id)

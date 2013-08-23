@@ -62,14 +62,17 @@ class Node
 	/**
 	 * @var hash
 	 */
-	public $nodes = array();
+	public $nodes = null;
 	public function setNodes($value)
 	{
+		if(!empty($value)) {
+			$this->nodes = array();
+		}
 		foreach($value as $id => $nodeData) {
 			$node = new Node;
 			$this->nodes[$id] = $node;
 			VoMapper::map($nodeData, $node);
-			$node->id = $id;
+			$node->id = $id;//md5($node->path);
 		}
 	}
 	public function setContent($value)
