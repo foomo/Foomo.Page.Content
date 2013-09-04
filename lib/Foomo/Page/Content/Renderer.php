@@ -36,7 +36,7 @@ class Renderer
 	public static function renderNode(Node $node, $rootDir, $locale, $contentType, $baseURL)
 	{
 		$doc = new Doc;
-		$doc->loadHTML(
+		@$doc->loadHTML(
 			$node->getRawContent($contentType, $locale)
 		);
 		$killList = array();

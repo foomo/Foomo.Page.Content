@@ -47,8 +47,8 @@ class Export
 			$repoNode->addName($language, $name);
 		}
 		if(is_array($node->nodes)) {
-			foreach($node->nodes as $childNode) {
-				$repoNode->addNode(self::nodeToRepoNode($childNode));
+			foreach($node->index as $childIndex) {
+				$repoNode->addNode(self::nodeToRepoNode($node->nodes[$childIndex]));
 			}
 		}
 		$region = 'universe';
@@ -62,7 +62,20 @@ class Export
 				}
 			}
 		}
+
+		$repoNode->data = self::getNodeData($node);
 		return $repoNode;
+	}
+	private static function getNodeData(Node $node)
+	{
+		$copy = array();
+		foreach($node as $k => $v) {
+			if(in_array($k, array('nodes'))) {
+				continue;
+			}
+			$copy[$k] = $v;
+		}
+		return $copy;
 	}
 	private static function extractLinkIds($language, $contentType, Node $node) {
 		$ret = array();
@@ -85,6 +98,6 @@ class Export
 	}
 	private static function pathToId($path)
 	{
-		return md5($path);
+		return $path;
 	}
 }

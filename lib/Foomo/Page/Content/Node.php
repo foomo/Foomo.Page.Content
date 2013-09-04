@@ -62,7 +62,7 @@ class Node
 	/**
 	 * @var hash
 	 */
-	public $nodes = null;
+	public $nodes = array();
 	public function setNodes($value)
 	{
 		if(!empty($value)) {
@@ -80,6 +80,8 @@ class Node
 		foreach($value as $key => $value) {
 			if(is_array($value)) {
 				$this->content[$key] = $value;
+			} else if(is_object($value)) {
+				$this->content[$key] = (array) $value;
 			} else {
 				if(!isset($this->content['default'])) {
 					$this->content['default'] = array();
@@ -139,7 +141,13 @@ class Node
 			}
 		}
 	}
-
+	public function setNames($names)
+	{
+		if(is_object($names)) {
+			$names = (array) $names;
+		}
+		$this->names = $names;
+	}
 	/**
 	 * @param string $name
 	 * @return Medium
