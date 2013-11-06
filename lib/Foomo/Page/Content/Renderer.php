@@ -36,9 +36,11 @@ class Renderer
 	public static function renderNode(Node $node, $rootDir, $locale, $contentType, $baseURL)
 	{
 		$doc = new Doc;
+		// die('<?xml encoding="UTF-8">' . $node->getRawContent($contentType, $locale));
 		@$doc->loadHTML(
-			$node->getRawContent($contentType, $locale)
+			'<?xml encoding="UTF-8">' . $node->getRawContent($contentType, $locale)
 		);
+		//$doc->loadHTML('<?xml encoding="UTF-8">' . $json->html);
 		$killList = array();
 		foreach($doc->getElementsByTagName('a') as $linkEl) {
 			/* @var El $linkEl */
