@@ -30,6 +30,7 @@ use DOMElement as El;
 
 class Export
 {
+	const REGION_UNIVERSE = 'universe';
 	/**
 	 * @param Node $node
 	 *
@@ -42,23 +43,22 @@ class Export
 		$repoNode->handler = 'foomo';
 		$repoNode->addGroup('www');
 		$repoNode->mimeType = 'text/html';
-		$repoNode->hidden = false;
+		$repoNode->hidden = array('universe' => array('de' => false, 'en' => false));
 		foreach($node->names as $language => $name) {
-			$repoNode->addName($language, $name);
+			$repoNode->addName(self::REGION_UNIVERSE, $language, $name);
 		}
 		if(is_array($node->nodes)) {
 			foreach($node->index as $childIndex) {
 				$repoNode->addNode(self::nodeToRepoNode($node->nodes[$childIndex]));
 			}
 		}
-		$region = 'universe';
-		$repoNode->addRegion($region);
+		$repoNode->addRegion(self::REGION_UNIVERSE);
 		foreach(array('de', 'en') as $language) {
-			$repoNode->addURI($region, $language, '/' . $language . $node->path);
+			$repoNode->addURI(self::REGION_UNIVERSE, $language, '/' . $language . $node->path);
 			foreach(array('full', 'summary') as $contentType) {
 				// we have no regions
 				foreach(self::extractLinkIds($language, $contentType, $node) as $linkId) {
-					$repoNode->addLinkId($region, $language, $linkId);
+					// $repoNode->addLinkId(self::REGION_UNIVERSE, $language, $linkId);
 				}
 			}
 		}
