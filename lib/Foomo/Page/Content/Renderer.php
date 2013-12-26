@@ -54,9 +54,16 @@ class Renderer
 			$src = call_user_func_array(array(get_called_class(), 'renderURLFormMedium'), array(
 				$node,
 				$imgEl->getAttribute('src'),
-				$imgEl->getAttribute('width'),
-				$imgEl->getAttribute('height')
+				$width  = $imgEl->getAttribute('width'),
+				$height = $imgEl->getAttribute('height')
 			));
+
+			foreach(array('width' => $width, 'height' => $height) as $sizeAttributeName => $sizeAttributeValue) {
+				if($sizeAttributeValue !== (string)(int) $sizeAttributeValue) {
+					$imgEl->removeAttribute($sizeAttributeName);
+				}
+			}
+
 			$imgEl->setAttribute('src', $src);
 		}
 		foreach($doc->getElementsByTagName('div') as $divEl) {
