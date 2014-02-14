@@ -29,9 +29,17 @@ use Foomo\Page\Content;
  */
 class Renderer
 {
-	public static function renderURLFormMedium(Node $node, $srcAttrValue, $widthAttrValue, $heightAttrValue)
+	public static function renderURLForMedium(Node $node, $srcAttrValue, $widthAttrValue, $heightAttrValue)
 	{
 		return Module::getHtdocsPath('medium.php') . $node->path . ':' . $srcAttrValue;
+	}
+	public static function renderURLForLink(Node $node, $locale, $baseURL, $hrefAttrValue)
+	{
+		if(!empty($hrefAttrValue) && substr($hrefAttrValue, 0, 7) == 'node://') {
+			return $baseURL . substr($hrefAttrValue, 6);
+		} else {
+			return $hrefAttrValue;
+		}
 	}
 	public static function renderNode(Node $node, $rootDir, $locale, $contentType, $baseURL)
 	{
@@ -45,13 +53,11 @@ class Renderer
 		foreach($doc->getElementsByTagName('a') as $linkEl) {
 			/* @var El $linkEl */
 			$href = $linkEl->getAttribute('href');
-			if(!empty($href) && substr($href, 0, 7) == 'node://') {
-				$linkEl->setAttribute('href', $baseURL . substr($href, 6));
-			}
+			$linkEl->setAttribute('href', call_user_func_array(array(get_called_class(), 'renderURLForLink'), array($node, $locale, $baseURL, $href)));
 		}
 		foreach($doc->getElementsByTagName('img') as $imgEl) {
 			/* @var El $imgEl */
-			$src = call_user_func_array(array(get_called_class(), 'renderURLFormMedium'), array(
+			$src = call_user_func_array(array(get_called_class(), 'renderURLForMedium'), array(
 				$node,
 				$imgEl->getAttribute('src'),
 				$width  = $imgEl->getAttribute('width'),
