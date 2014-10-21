@@ -77,16 +77,21 @@ class Node
 	}
 	public function setContent($value)
 	{
-		foreach($value as $key => $value) {
-			if(is_array($value)) {
-				$this->content[$key] = $value;
-			} else if(is_object($value)) {
-				$this->content[$key] = (array) $value;
-			} else {
-				if(!isset($this->content['default'])) {
-					$this->content['default'] = array();
+		if(!empty($value)) {
+			if(is_string($value)) {
+				$value = array('en' => $value);
+			}
+			foreach($value as $key => $value) {
+				if(is_array($value)) {
+					$this->content[$key] = $value;
+				} else if(is_object($value)) {
+					$this->content[$key] = (array) $value;
+				} else {
+					if(!isset($this->content['default'])) {
+						$this->content['default'] = array();
+					}
+					$this->content['default'][$key] = $value;
 				}
-				$this->content['default'][$key] = $value;
 			}
 		}
 	}
@@ -99,14 +104,42 @@ class Node
 	{
 		return isset($this->content[$path]) && isset($this->content[$path][$locale]);
 	}
-	public function getRawContent($path, $locale)
+	public function getContentFile($path, $locale)
 	{
 		if($this->hasContent($path, $locale)) {
-			return file_get_contents($this->content[$path][$locale]);
+			return $this->content[$path][$locale];
 		} else if(isset($this->content['default'][$locale])) {
-			return file_get_contents($this->content['default'][$locale]);
+			return $this->content['default'][$locale];
+		} else if(isset($this->content['default'][$locale])){
+			return $this->content[$locale];
+		} else if(!empty($this->content['default'])) {
+			$keys = array_keys($this->content['default']);
+			if(count($keys) > 0) {
+				return $this->content['default'][$keys[0]];
+			} else {
+				return null;
+			}
 		} else {
-			return file_get_contents($this->content[$locale]);
+			return null;
+		}
+	}
+	public function getContentFileSuffix($path, $locale)
+	{
+		$file = basename((string)$this->getContentFile($path, $locale));
+		if(!empty($file) && strpos($file, '.') !== 0) {
+			$reversed = strrev($file);
+			return strrev(substr($reversed, 0, strpos($reversed, '.')));
+		} else {
+			return null;
+		}
+	}
+	public function getRawContent($path, $locale)
+	{
+		$file = self::getContentFile($path, $locale);
+		if(!empty($file) && file_exists($file)) {
+			return file_get_contents($file);
+		} else {
+			return null;
 		}
 	}
 	/**

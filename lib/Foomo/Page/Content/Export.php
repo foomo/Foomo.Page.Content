@@ -23,7 +23,6 @@ namespace Foomo\Page\Content;
  * @link www.foomo.org
  * @license www.gnu.org/licenses/lgpl.txt
  */
-use Foomo\SimpleData\VoMapper;
 use Foomo\ContentServer\Vo\Content\RepoNode;
 use DOMDocument as Doc;
 use DOMElement as El;
@@ -42,7 +41,18 @@ class Export
 		$repoNode->id = self::getId($node);
 		$repoNode->handler = 'foomo';
 		$repoNode->addGroup('www');
-		$repoNode->mimeType = 'text/html';
+		foreach($node->content['default'] as $lang => $contentFile) {
+			switch(true) {
+				case substr($contentFile, -3) == '.md':
+					$repoNode->mimeType = 'text/markdown';
+					break;
+				case substr($contentFile, -5) == '.html':
+				default:
+					$repoNode->mimeType = 'text/html';
+			}
+			break;
+		}
+		$repoNode->handler = $repoNode->mimeType;
 		$repoNode->hidden = array('universe' => array('de' => false, 'en' => false));
 		foreach($node->names as $language => $name) {
 			$repoNode->addName(self::REGION_UNIVERSE, $language, $name);
@@ -79,15 +89,23 @@ class Export
 	}
 	private static function extractLinkIds($language, $contentType, Node $node) {
 		$ret = array();
-		$doc = new Doc;
-		$doc->loadHTML(
-			$node->getRawContent($contentType, $language)
-		);
-		foreach($doc->getElementsByTagName('a') as $linkEl) {
-			/* @var El $linkEl */
-			$href = $linkEl->getAttribute('href');
-			if(!empty($href) && substr($href, 0, 7) == 'node://') {
-				$ret[] = self::pathToId(substr($href, 6));
+		$rawContent = $node->getRawContent($contentType, $language);
+		if(!empty($rawContent)) {
+			$doc = new Doc;
+			libxml_clear_errors();
+			libxml_use_internal_errors(true);
+			$doc->loadHTML($rawContent);
+			foreach(libxml_get_errors() as $e) {
+				/* @var $e \LibXMLError */
+				//trigger_error('xml e ' . $e->message);
+			}
+			libxml_clear_errors();
+			foreach($doc->getElementsByTagName('a') as $linkEl) {
+				/* @var El $linkEl */
+				$href = $linkEl->getAttribute('href');
+				if(!empty($href) && substr($href, 0, 7) == 'node://') {
+					$ret[] = self::pathToId(substr($href, 6));
+				}
 			}
 		}
 		return $ret;

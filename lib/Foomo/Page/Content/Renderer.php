@@ -29,7 +29,7 @@ use Foomo\Page\Content;
  */
 class Renderer
 {
-	public static function renderURLForMedium(Node $node, $srcAttrValue, $widthAttrValue, $heightAttrValue)
+	public static function renderURLForMedium(Node $node, $srcAttrValue, $widthAttrValue, $heightAttrValue, array $cssClasses = array())
 	{
 		return Module::getHtdocsPath('medium.php') . $node->path . ':' . $srcAttrValue;
 	}
@@ -43,12 +43,32 @@ class Renderer
 	}
 	public static function renderNode(Node $node, $rootDir, $locale, $contentType, $baseURL)
 	{
+		switch($suffix = $node->getContentFileSuffix('', $locale)) {
+			case 'html':
+			case 'htm':
+				return self::renderNodeAsHTML($node, $rootDir, $locale, $contentType, $baseURL);
+			case 'md':
+				return self::renderHTML(
+					$node,
+					Renderer\Markdown::preRenderNode($node, $rootDir, $locale, $contentType, $baseURL),
+					$rootDir, $locale, $contentType, $baseURL
+				);
+			default:
+				trigger_error("WTF would that be " . $suffix, E_USER_ERROR);
+		}
+	}
+
+	private function renderNodeAsHTML(Node $node, $rootDir, $locale, $contentType, $baseURL)
+	{
+		return self::renderHTML($node, $node->getRawContent($contentType, $locale), $rootDir, $locale, $contentType, $baseURL);
+	}
+
+	private function renderHTML(Node $node, $html, $rootDir, $locale, $contentType, $baseURL)
+	{
 		$doc = new Doc;
-		// die('<?xml encoding="UTF-8">' . $node->getRawContent($contentType, $locale));
-		@$doc->loadHTML(
-			'<?xml encoding="UTF-8">' . $node->getRawContent($contentType, $locale)
+		$doc->loadHTML(
+			'<?xml encoding="UTF-8">' . $html
 		);
-		//$doc->loadHTML('<?xml encoding="UTF-8">' . $json->html);
 		$killList = array();
 		foreach($doc->getElementsByTagName('a') as $linkEl) {
 			/* @var El $linkEl */
@@ -61,7 +81,8 @@ class Renderer
 				$node,
 				$imgEl->getAttribute('src'),
 				$width  = $imgEl->getAttribute('width'),
-				$height = $imgEl->getAttribute('height')
+				$height = $imgEl->getAttribute('height'),
+				explode(' ', str_replace('  ', '', $imgEl->getAttribute('class')))
 			));
 
 			foreach(array('width' => $width, 'height' => $height) as $sizeAttributeName => $sizeAttributeValue) {
@@ -69,7 +90,6 @@ class Renderer
 					$imgEl->removeAttribute($sizeAttributeName);
 				}
 			}
-
 			$imgEl->setAttribute('src', $src);
 		}
 		foreach($doc->getElementsByTagName('div') as $divEl) {
@@ -89,6 +109,7 @@ class Renderer
 		$html = $doc->saveHTML();
 		$html = substr($html, strpos($html, '<body>') + 6);
 		return substr($html, 0, strpos($html, '</body>'));
+
 	}
 
 	private static function renderApp($rootDir, $baseURL, $locale, $doc, $appEl, $linkerAttr)
