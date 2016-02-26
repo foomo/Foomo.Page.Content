@@ -64,7 +64,7 @@ class Module extends \Foomo\Modules\ModuleBase
 	public static function getResources()
 	{
 		return array(
-			\Foomo\Modules\Resource\Module::getResource('Foomo.SimpleData.MongoDB', '0.3.*'),
+//			\Foomo\Modules\Resource\Module::getResource('Foomo.SimpleData.MongoDB', '0.3.*'),
 			\Foomo\Modules\Resource\Module::getResource('Foomo.Media', '0.2.*'),
 			//\Foomo\Modules\Resource\ComposerPackage::getResource('michelf/php-markdown', '1.4.0')
 			\Foomo\Modules\Resource\ComposerPackage::getResource('erusev/parsedown-extra', '0.2.*')

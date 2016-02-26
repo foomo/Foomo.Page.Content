@@ -30,17 +30,28 @@ use DOMElement as El;
 class Export
 {
 	const REGION_UNIVERSE = 'universe';
+
+	public static function nodeToRepo(Node $node,  array $languages)
+	{
+		$repo = [];
+		foreach($languages as $dimension) {
+			$repo[$dimension] = self::nodeToRepoNode($node, $dimension);
+		}
+		return $repo;
+	}
 	/**
 	 * @param Node $node
+	 * @param $language
 	 *
 	 * @return RepoNode
 	 */
-	public static function nodeToRepoNode(Node $node)
+	public static function nodeToRepoNode(Node $node, $language)
 	{
 		$repoNode = new RepoNode();
 		$repoNode->id = self::getId($node);
-		$repoNode->handler = 'foomo';
+		//$repoNode->handler = 'foomo';
 		$repoNode->addGroup('www');
+
 		foreach($node->content['default'] as $lang => $contentFile) {
 			switch(true) {
 				case substr($contentFile, -3) == '.md':
@@ -52,27 +63,22 @@ class Export
 			}
 			break;
 		}
-		$repoNode->handler = $repoNode->mimeType;
-		$repoNode->hidden = array('universe' => array('de' => false, 'en' => false));
-		foreach($node->names as $language => $name) {
-			$repoNode->addName(self::REGION_UNIVERSE, $language, $name);
-		}
+		$repoNode->hidden = false;
+		$repoNode->name = $node->names[$language];
 		if(is_array($node->nodes)) {
 			foreach($node->index as $childIndex) {
-				$repoNode->addNode(self::nodeToRepoNode($node->nodes[$childIndex]));
+				$repoNode->addNode(self::nodeToRepoNode($node->nodes[$childIndex], $language));
 			}
 		}
-		$repoNode->addRegion(self::REGION_UNIVERSE);
-		foreach(array('de', 'en') as $language) {
-			$repoNode->addURI(self::REGION_UNIVERSE, $language, '/' . $language . $node->path);
-			foreach(array('full', 'summary') as $contentType) {
-				// we have no regions
-				foreach(self::extractLinkIds($language, $contentType, $node) as $linkId) {
-					// $repoNode->addLinkId(self::REGION_UNIVERSE, $language, $linkId);
-				}
-			}
-		}
+		$repoNode->URI = '/' . $language . $node->path;
+		foreach(array('full', 'summary') as $contentType) {
+			// we have no regions
+			foreach(self::extractLinkIds($language, $contentType, $node) as $linkId) {
 
+				 // $repoNode->addLinkId(self::REGION_UNIVERSE, $language, $linkId);
+			}
+		}
+		// maybe add links in here
 		$repoNode->data = self::getNodeData($node);
 		return $repoNode;
 	}
