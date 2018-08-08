@@ -51,17 +51,18 @@ class Export
 		$repoNode->id = self::getId($node);
 		//$repoNode->handler = 'foomo';
 		$repoNode->addGroup('www');
-
-		foreach($node->content['default'] as $lang => $contentFile) {
-			switch(true) {
-				case substr($contentFile, -3) == '.md':
-					$repoNode->mimeType = 'text/markdown';
-					break;
-				case substr($contentFile, -5) == '.html':
-				default:
-					$repoNode->mimeType = 'text/html';
+		if(!empty($node->content['default'])) {
+			foreach($node->content['default'] as $lang => $contentFile) {
+				switch(true) {
+					case substr($contentFile, -3) == '.md':
+						$repoNode->mimeType = 'text/markdown';
+						break;
+					case substr($contentFile, -5) == '.html':
+					default:
+						$repoNode->mimeType = 'text/html';
+				}
+				break;
 			}
-			break;
 		}
 		$repoNode->hidden = false;
 		$repoNode->name = $node->names[$language];
